@@ -31,9 +31,10 @@ Usage:
 $0 [OPTIONS...]
 
 Options:
---dry-run       Don't actually build the image.
---no-push       Build the image but don't push to the registry.
---help, -h      Show this help message.
+--version <version>   Specify an exact version to build an image of.
+--dry-run             Don't actually build the image.
+--no-push             Build the image but don't push to the registry.
+--help, -h            Show this help message.
 END
                         exit 0
                         ;;
