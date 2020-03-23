@@ -1,12 +1,20 @@
 #!/bin/bash
 
-for i in "$@"; do
-        case $i in
+VERSION="latest"
+
+while (( "$#" )); do
+        case $1 in
                 --dry-run)
                         DRY_RUN=1
+			shift
                         ;;
+		--version)
+			VERSION=$2
+			shift 2
+			;;
                 --no-push)
                         NO_PUSH=1
+			shift
                         ;;
                 --help|-h)
                         cat <<END
@@ -44,11 +52,15 @@ fi
 TAG_BASE="registry.gitlab.com/meridiangrp/fivem-server"
 VERSION_REGEX="https:\\/\\/runtime.fivem.net\\/artifacts\\/fivem\\/build_proot_linux\\/master\\/(\\d+)-[\\da-z]+\\/"
 
-LATEST=$(fivem-utility version-server -g latest)
+LATEST=$(fivem-utility version-server -g ${VERSION})
 URL_BASE=$(echo "$LATEST" | awk '{ print $2; }')
 URL="${URL_BASE}fx.tar.xz"
 VERSION=$(echo "$LATEST" | awk '{ print $1; }')
 TAG="$TAG_BASE:$VERSION"
+
+if [ ! $VERSION ]; then
+	exit 1
+fi
 
 echo "Server version: $VERSION"
 echo "Building image '$TAG'..."
@@ -68,3 +80,4 @@ if [[ $NO_PUSH -ne 1 ]]; then
         echo "Pushed."
 fi
 echo "Done."
+
