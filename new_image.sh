@@ -58,6 +58,9 @@ fi
 TAG_BASE="registry.gitlab.com/meridiangrp/fivem-server"
 VERSION_REGEX="https:\\/\\/runtime.fivem.net\\/artifacts\\/fivem\\/build_proot_linux\\/master\\/(\\d+)-[\\da-z]+\\/"
 
+if [[ "$VERSION" = "latest" ]]; then
+	IS_LATEST_IMAGE=1
+fi
 LATEST=$(fivem-utility version-server -g ${VERSION})
 URL_BASE=$(echo "$LATEST" | awk '{ print $2; }')
 URL="${URL_BASE}fx.tar.xz"
@@ -81,9 +84,13 @@ fi
 echo "Server version: $VERSION"
 echo "Building image '$TAG'..."
 if [[ $DRY_RUN -ne 1 ]]; then
+	if [[ $IS_LATEST_IMAGE -eq 1 ]]; then
+		EXTRA_ARGS="-t $TAG_BASE:latest"
+	fi
         docker build \
                 --build-arg "PACKAGE_URL=$URL" \
                 -t "$TAG" \
+		$EXTRA_ARGS \
                 .
 fi
 echo "Finished building."
@@ -92,11 +99,16 @@ if [[ $NO_PUSH -ne 1 ]]; then
         echo "Pushing image '$TAG'"
         if [[ $DRY_RUN -ne 1 ]]; then
                 docker push "$TAG"
+		if [[ $IS_LATEST_IMAGE -eq 1 ]]; then
+			docker push "$TAG_BASE:latest"
+		fi
         fi
         echo "Pushed."
 fi
 
-echo $VERSION > .fivem-version
+if [[ $IS_LATEST_IMAGE -eq 1 ]]; then
+	echo $VERSION > .fivem-version
+fi
 
 echo "Done."
 
