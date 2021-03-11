@@ -16,6 +16,10 @@ while (( "$#" )); do
                         NO_PUSH=1
 			shift
                         ;;
+		--only-if-new)
+			IF_NEW=1
+			shift
+			;;
                 --help|-h)
                         cat <<END
 FiveM Server Docker Image Autobuild
@@ -34,6 +38,7 @@ Options:
 --version <version>   Specify an exact version to build an image of.
 --dry-run             Don't actually build the image.
 --no-push             Build the image but don't push to the registry.
+--only-if-new         Only build the image if it's changed since the last build.
 --help, -h            Show this help message.
 END
                         exit 0
@@ -63,6 +68,16 @@ if [ ! $VERSION ]; then
 	exit 1
 fi
 
+if [[ $IF_NEW -eq 1 ]]; then
+	if [[ -f .fivem-version ]]; then
+		CURRENT=$(cat .fivem-version)
+		if [[ $CURRENT -eq $VERSION ]]; then
+			echo "No need to generate a new image."
+			exit 0
+		fi
+	fi
+fi
+
 echo "Server version: $VERSION"
 echo "Building image '$TAG'..."
 if [[ $DRY_RUN -ne 1 ]]; then
@@ -80,5 +95,8 @@ if [[ $NO_PUSH -ne 1 ]]; then
         fi
         echo "Pushed."
 fi
+
+echo $VERSION > .fivem-version
+
 echo "Done."
 
