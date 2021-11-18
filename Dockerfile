@@ -15,4 +15,5 @@ WORKDIR /data
 VOLUME [ "/data" ]
 EXPOSE 30120/tcp
 EXPOSE 30120/udp
-CMD [ "/bin/sh", "/srv/run.sh", "+exec", "server.cfg" ]
+EXPOSE 40120/udp
+CMD [ "/bin/sh", "/srv/run.sh", "+set", "txDataPath", "/data/txData" ]
