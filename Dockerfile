@@ -1,15 +1,15 @@
+FROM ghcr.io/lilopkins/fivem-utility:main AS fetch
+RUN apt update && apt install -y curl && rm -rf /var/lib/apt/lists/*
+WORKDIR /usr/src/fivem
+COPY pull_server.sh .
+RUN bash pull_server.sh
+
 FROM alpine:latest
-
-ARG PACKAGE_URL
-
 WORKDIR /srv
-
-RUN apk --no-cache add curl
 RUN mkdir /data
-RUN curl -Lo fx.tar.xz $PACKAGE_URL
+COPY --from=fetch /usr/src/fivem/fx.tar.xz .
 RUN tar xvf fx.tar.xz
 RUN rm fx.tar.xz
-
 WORKDIR /data
 
 VOLUME [ "/data" ]
